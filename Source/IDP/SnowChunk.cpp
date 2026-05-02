@@ -33,10 +33,14 @@ void ASnowChunk::InitializeChunk(
 
     SetActorLocation(FVector(ChunkOrigin.X, ChunkOrigin.Y, 0.0f));
 
-    SnowRT_A = UKismetRenderingLibrary::CreateRenderTarget2D(
-        this, 1024, 1024, ETextureRenderTargetFormat::RTF_RGBA8);
-    SnowRT_B = UKismetRenderingLibrary::CreateRenderTarget2D(
-        this, 1024, 1024, ETextureRenderTargetFormat::RTF_RGBA8);
+    if (!SnowRT_A)
+    {
+        SnowRT_A = UKismetRenderingLibrary::CreateRenderTarget2D(this, 1024, 1024, ETextureRenderTargetFormat::RTF_RGBA8);
+    }
+    if (!SnowRT_B)
+    {
+        SnowRT_B = UKismetRenderingLibrary::CreateRenderTarget2D(this, 1024, 1024, ETextureRenderTargetFormat::RTF_RGBA8);
+    }
 
     // Clear immediately after creation
     UKismetRenderingLibrary::ClearRenderTarget2D(this, SnowRT_A, FLinearColor(1, 0, 0, 1));
@@ -242,18 +246,6 @@ void ASnowChunk::ApplyVertexDeformation(
                     CurrentVertices[Idx].Z = OriginalVertices[Idx].Z - DeformationDepth[Idx];
                     bVertexDirty = true;
                 }
-
-               /* float NewDepth = FMath::Min(
-                    DeformationDepth[Idx] + DepthCm * Influence,
-                    MaxDepthCm
-                );
-
-                if (NewDepth > DeformationDepth[Idx])
-                {
-                    DeformationDepth[Idx] = NewDepth;
-                    CurrentVertices[Idx].Z = OriginalVertices[Idx].Z - DeformationDepth[Idx];
-                    bVertexDirty = true;
-                }*/
             }
         }
     }
