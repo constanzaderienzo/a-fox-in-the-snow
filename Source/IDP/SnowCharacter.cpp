@@ -5,6 +5,7 @@
 #include "SnowDeformationManager.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "DrawDebugHelpers.h"
+#include "Kismet/GameplayStatics.h"
 
 ASnowCharacter::ASnowCharacter()
 {
@@ -20,7 +21,6 @@ void ASnowCharacter::BeginPlay()
 		SnowManager = GM->SnowManager;
 	}
 
-	// Default setup in case feet aren't configured in BP yet
 	if (FootContacts.Num() == 0)
 	{
 		FFootContactState LeftFoot;
@@ -37,8 +37,22 @@ void ASnowCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (!SnowManager)
+	{
+		SnowManager = Cast<ASnowDeformationManager>(
+			UGameplayStatics::GetActorOfClass(this, ASnowDeformationManager::StaticClass())
+		);
+
+		if (!SnowManager)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("SnowManager is null"));
+			return;
+		}
+
+		UE_LOG(LogTemp, Warning, TEXT("SnowManager found: %s"), *SnowManager->GetName());
+	}
+
 	UpdateFootContacts();
-	UpdateMeshSink();
 }
 
 bool ASnowCharacter::TraceFootToGround(const FFootContactState& Foot, FHitResult& OutHit, FVector& OutSocketLocation) const
@@ -56,7 +70,7 @@ bool ASnowCharacter::TraceFootToGround(const FFootContactState& Foot, FHitResult
 
 	FCollisionQueryParams Params(SCENE_QUERY_STAT(FootTrace), false, this);
 	Params.AddIgnoredActor(this);
-	Params.bTraceComplex = false;
+	Params.bTraceComplex = true;
 
 	const FCollisionShape Shape = FCollisionShape::MakeSphere(Foot.TraceRadius);
 
@@ -76,7 +90,10 @@ bool ASnowCharacter::TraceFootToGround(const FFootContactState& Foot, FHitResult
 
 void ASnowCharacter::UpdateFootContacts()
 {
-	if (!SnowManager) return;
+	if (!SnowManager) {
+		UE_LOG(LogTemp, Warning, TEXT("SnowManager is null"));
+		return;
+	}
 
 	for (FFootContactState& Foot : FootContacts)
 	{
@@ -89,12 +106,10 @@ void ASnowCharacter::UpdateFootContacts()
 		if (bHit && Hit.GetActor())
 		{
 			const float ContactHeight = FMath::Abs(SocketLocation.Z - Hit.ImpactPoint.Z);
-			bGroundedNow = ContactHeight <= 20.0f;
+			bGroundedNow = ContactHeight <= 30.0f;
 			
 			if (bGroundedNow)
 			{
-				Foot.CurrentDepthCm = Foot.MaxDepthCm;
-
 				const bool bFarEnough =
 					Foot.LastStampWorld.IsZero() ||
 					FVector::Dist2D(Foot.LastStampWorld, Hit.Location) >= Foot.MinStampDistanceCm;
@@ -104,9 +119,8 @@ void ASnowCharacter::UpdateFootContacts()
 					float FootYaw = (GetActorRotation().Yaw + 90.0f)/ 360.0f;
 
 					FVector2D CurrUV = SnowManager->GetSnowUVFromHit(Hit);
-					FVector2D PrevUV = (Foot.LastStampUV.X < 0.0f) ? CurrUV : Foot.LastStampUV;
 
-					SnowManager->StampAtWorldHit(Hit, PrevUV, Foot.RadiusX, Foot.RadiusY, FootYaw);
+					SnowManager->StampAtWorldHit(Hit, Foot.LastStampWorld, Foot.LastStampUV, Foot.RadiusX, Foot.RadiusY, FootYaw);
 
 					Foot.LastStampWorld = Hit.Location;
 					Foot.LastStampUV = CurrUV;
@@ -119,47 +133,8 @@ void ASnowCharacter::UpdateFootContacts()
 		if (!bGroundedNow && Foot.bWasGroundedLastFrame)
 		{
 			Foot.LastStampUV = FVector2D(-1.0f, -1.0f);
-			Foot.CurrentDepthCm = 0.0f; // foot lifted, back to surface
 		}
 
 		Foot.bWasGroundedLastFrame = bGroundedNow;
 	}
-}
-
-void ASnowCharacter::UpdateMeshSink()
-{
-
-	UE_LOG(LogTemp, Warning, TEXT("SinkOffset: %f | DefaultZ: %f | NewZ: %f"),
-		CurrentMeshSinkOffset,
-		DefaultMeshRelativeLocation.Z,
-		DefaultMeshRelativeLocation.Z + CurrentMeshSinkOffset);
-	if (!bDefaultMeshLocationCaptured)
-	{
-		DefaultMeshRelativeLocation = GetMesh()->GetRelativeLocation();
-		bDefaultMeshLocationCaptured = true;
-		return;
-	}
-
-	float TotalDepth = 0.0f;
-	int32 GroundedCount = 0;
-
-	for (const FFootContactState& Foot : FootContacts)
-	{
-		if (Foot.bWasGroundedLastFrame)
-		{
-			TotalDepth += Foot.CurrentDepthCm;
-			GroundedCount++;
-		}
-	}
-
-	float TargetSink = GroundedCount > 0
-		? (TotalDepth / GroundedCount) * DepthIKScale
-		: 0.0f;
-
-	// Apply directly — no interpolation
-	CurrentMeshSinkOffset = TargetSink;
-
-	FVector NewMeshLocation = DefaultMeshRelativeLocation;
-	NewMeshLocation.Z -= CurrentMeshSinkOffset;
-	GetMesh()->SetRelativeLocation(NewMeshLocation);
 }

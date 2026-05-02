@@ -15,9 +15,9 @@ struct FFootContactState
 	FName SocketName;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Snow")
-	float RadiusX = 0.02f;
+	float RadiusX = 0.025f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Snow")
-	float RadiusY = 0.018f;
+	float RadiusY = 0.055f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Snow")
 	float TraceStartOffset = 10.0f;
@@ -42,7 +42,6 @@ struct FFootContactState
 	bool bWasGroundedLastFrame = false;
 	FVector LastStampWorld = FVector::ZeroVector;
 	FVector2D LastStampUV = FVector2D(-1.0f, -1.0f);
-	float CurrentDepthCm = 0.0f;
 };
 
 UCLASS()
@@ -63,7 +62,6 @@ protected:
 
 	bool TraceFootToGround(const FFootContactState& Foot, FHitResult& OutHit, FVector& OutSocketLocation) const;
 	void UpdateFootContacts();
-	void UpdateMeshSink();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Snow")
 	TArray<FFootContactState> FootContacts;
