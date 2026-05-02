@@ -15,9 +15,9 @@ struct FFootContactState
 	FName SocketName;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Snow")
-	float RadiusX = 0.025f;
+	float RadiusX = 0.035f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Snow")
-	float RadiusY = 0.055f;
+	float RadiusY = 0.075f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Snow")
 	float TraceStartOffset = 10.0f;
@@ -30,14 +30,6 @@ struct FFootContactState
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Snow")
 	float MinStampDistanceCm = 0.0f;
-
-	// How much depth accumulates per stamp (in cm)
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Snow")
-	float DepthPerStamp = 10.0f;
-
-	// Maximum depth this foot can sink (should match MaxDepthCm in M_Snow)
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Snow")
-	float MaxDepthCm = 30.0f;
 
 	bool bWasGroundedLastFrame = false;
 	FVector LastStampWorld = FVector::ZeroVector;

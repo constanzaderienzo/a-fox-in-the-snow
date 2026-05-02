@@ -88,7 +88,7 @@ public:
 
     // Max depth a stamp can deform in cm
     UPROPERTY(EditAnywhere, Category = "Snow|Deformation")
-    float MaxDepthCm = 30.0f;
+    float MaxDepthCm = 20.0f;
 
 protected:
     virtual void BeginPlay() override;

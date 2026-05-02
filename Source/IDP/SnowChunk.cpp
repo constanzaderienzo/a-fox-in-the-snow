@@ -229,8 +229,10 @@ void ASnowChunk::ApplyVertexDeformation(
             if (EllipseDist <= 1.0f)
             {
                 // Inside stamp — push down with smooth falloff
-                //float Influence = FMath::SmoothStep(0.0f, 1.0f, 1.0f - EllipseDist);
-                float Influence = FMath::Pow(1.0f - EllipseDist, 2.0f);
+                float Influence = FMath::SmoothStep(0.0f, 1.0f, 1.0f - EllipseDist);
+                //float Influence = FMath::Pow(1.0f - EllipseDist, 2.0f);
+
+                //float Influence = 1.0f - FMath::SmoothStep(0.35f, 1.0f, FMath::Clamp(EllipseDist, 0.0f, 1.0f));
                 
                 float TargetDepth = DepthCm * Influence;
 
