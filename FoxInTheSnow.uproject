@@ -1,0 +1,22 @@
+{
+	"FileVersion": 3,
+	"EngineAssociation": "{1E2C9A71-4DD3-1D15-E9EA-41ADAE6E0E6A}",
+	"Category": "",
+	"Description": "",
+	"Modules": [
+		{
+			"Name": "FoxInTheSnow",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		}
+	],
+	"Plugins": [
+		{
+			"Name": "ModelingToolsEditorMode",
+			"Enabled": true,
+			"TargetAllowList": [
+				"Editor"
+			]
+		}
+	]
+}

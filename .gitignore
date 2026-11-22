@@ -1,0 +1,29 @@
+# Unreal generated folders (rebuilt automatically, never commit)
+Binaries/
+Intermediate/
+Saved/
+DerivedDataCache/
+
+# Same folders inside plugins
+Plugins/**/Binaries/
+Plugins/**/Intermediate/
+
+# IDE / Visual Studio (regenerated via "Generate Visual Studio project files")
+.vs/
+.vscode/
+.idea/
+*.sln
+*.slnx
+*.suo
+*.sdf
+*.opensdf
+*.VC.db
+*.VC.opendb
+
+# Build outputs
+*.pdb
+*.ipch
+
+# OS junk
+Thumbs.db
+.DS_Store
